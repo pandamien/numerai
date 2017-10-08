@@ -26,22 +26,20 @@ def classify():
     prediction_features = predict_data[features]
     ids = predict_data["id"]
 
-    svc = SVC(kernel='rbf', C=50)
-
-    knn = KNeighborsClassifier(n_neighbors=1)
-
     xgc = XGBClassifier(nthread=-1, learning_rate=0.10, subsample=0.6, colsample_bytree=0.9, n_estimators=100,
                         max_depth=4, min_child_weight=3, silent=1, objective='binary:logistic')
 
-    etc = ExtraTreesClassifier(criterion='entropy', verbose=0, n_jobs=-1, min_samples_split=4, min_samples_leaf=2,
-                               n_estimators=100, max_depth=2, random_state=1)
+    etc = ExtraTreesClassifier(criterion='entropy', verbose=0, n_jobs=-1, min_samples_split=2, min_samples_leaf=2,
+                               n_estimators=100, max_features=2, max_depth=3, random_state=1)
 
-    rfc = RandomForestClassifier(criterion='entropy', verbose=0, n_jobs=-1, min_samples_split=4, min_samples_leaf=2,
-                                 n_estimators=100, max_depth=2, random_state=1)
+    rfc = RandomForestClassifier(criterion='entropy', verbose=0, n_jobs=-1, min_samples_split=2, min_samples_leaf=2,
+                                 n_estimators=100, max_features=2, max_depth=3, random_state=1)
 
-    lr = LogisticRegression(C=100, solver='lbfgs', penalty='l2', tol=1e-6, n_jobs=-1, max_iter=50, )
+    lr = LogisticRegression(C=10, solver='lbfgs', penalty='l2', tol=1e-6, n_jobs=-1, max_iter=50, )
 
-    sclf = StackingClassifier(classifiers=[xgc, etc, rfc, lr], meta_classifier=svc, use_probas=True,
+    adc = AdaBoostClassifier(base_estimator=etc, n_estimators=50, learning_rate=0.1, )
+
+    sclf = StackingClassifier(classifiers=[xgc, rfc, adc], meta_classifier=lr, use_probas=True,
                               average_probas=False)
 
     params = {'kneighborsclassifier__n_neighbors': [1, 5],
@@ -50,10 +48,10 @@ def classify():
 
     print("Training...")
     # model = GridSearchCV(estimator=sclf, param_grid=params, cv=5, refit=True)
-    svc.fit(training_features, training_targets)
+    sclf.fit(training_features, training_targets)
 
     print("Predicting...")
-    _predictions = svc.predict_proba(prediction_features)[:, 1]
+    _predictions = sclf.predict_proba(prediction_features)[:, 1]
     _results = pd.DataFrame(data={'probability': _predictions})
     result = pd.DataFrame(ids).join(_results)
 
