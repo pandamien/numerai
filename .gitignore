@@ -16,7 +16,6 @@ htmlcov/
 .coverage
 .coverage.*
 .cache
-
 # Jupyter Notebook
 .ipynb_checkpoints
 
@@ -38,13 +37,13 @@ env/
 .spyproject
 
 
-
+*.csv
 # mkdocs documentation
 /site
 
 #idea
 .idea/
-
+.vscode/
 # dataset
 train_data.csv
 predict_data.csv
