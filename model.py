@@ -61,20 +61,24 @@ def main():
 
     print("Predicting...")
 
-    # _predictions = model.predict_proba(prediction_features)[:, 1]
+    _predictions = model.predict_proba(prediction_features)[:, 1]
     y_predictions = model.predict_proba(x_prediction)[:, 1]
 
     print("- probabilities:", y_predictions[1:6])
 
     print("- target:", validation['target_bernie'][1:6])
     print("- rounded probability:", [round(p) for p in y_predictions][1:6])
-
+    # accuracy
+    correct = [round(x)==y for (x,y) in zip(y_predictions, validation['target_bernie'])]
+    print("- accuracy: ", sum(correct)/float(validation.shape[0]))
+     # Our validation logloss 
+    print("- validation logloss:", metrics.log_loss(validation['target_bernie'], y_predictions))
     # format and save result in csv files
-    # _results = pd.DataFrame(data={'probability': _predictions})
-    # result = pd.DataFrame(ids).join(_results)
+    _results = pd.DataFrame(data={'probability': _predictions})
+    result = pd.DataFrame(ids).join(_results)
 
-    # print("Writing predictions")
-    # result.to_csv("predictions.csv", index=False)
+    print("Writing predictions")
+    result.to_csv("bernie_predictions.csv", index=False)
 
 
 if __name__ == '__main__':
