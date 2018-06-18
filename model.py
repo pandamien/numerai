@@ -30,10 +30,11 @@ def main():
         'target_jordan', 'target_ken'], axis=1)
 
     features = [f for f in list(train_bernie) if "feature" in f]
-    training_features = train_bernie[features]
-    training_targets = train_bernie["target_bernie"]
-    prediction_features = predict_data[features]
+    _features = train_bernie[features]
+    _targets = train_bernie["target_bernie"]
+    #validation features
     x_prediction = validation[features]
+
     ids = predict_data["id"]
 
     xgc = XGBClassifier(nthread=-1, learning_rate=0.10, subsample=0.6, colsample_bytree=0.9, n_estimators=100,
@@ -57,11 +58,12 @@ def main():
 
     print("Training...")
     model = sclf
-    model.fit(training_features, training_targets)
+    model.fit(_features, _targets)
 
     print("Predicting...")
-
+    prediction_features = predict_data[features]
     _predictions = model.predict_proba(prediction_features)[:, 1]
+    #validations
     y_predictions = model.predict_proba(x_prediction)[:, 1]
 
     print("- probabilities:", y_predictions[1:6])
@@ -74,7 +76,7 @@ def main():
      # Our validation logloss 
     print("- validation logloss:", metrics.log_loss(validation['target_bernie'], y_predictions))
     # format and save result in csv files
-    _results = pd.DataFrame(data={'probability': _predictions})
+    _results = pd.DataFrame(data={'probability_bernie': _predictions})
     result = pd.DataFrame(ids).join(_results)
 
     print("Writing predictions")
